@@ -1,0 +1,881 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b40a9c33-6bb0-4b82-a7a1-0e8e3f4e1d01",
+              "name": "script",
+              "value": "={{ $json.script }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6160,
+        7504
+      ],
+      "id": "9ca26980-23ef-4c7a-b6ea-1b5183320986",
+      "name": "Use My Script1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Choose the first non-premium avatar returned by HeyGen\nconst root = $input.first().json;\nconst avatars = Array.isArray(root?.data?.avatars) ? root.data.avatars : (Array.isArray(root?.avatars) ? root.avatars : []);\nconst chosen = avatars.find(a => a?.premium === false) || avatars[0] || {};\nconst avatarId = chosen.avatar_id || 'Abigail_expressive_2024112501';\nreturn $input.all().map(item => ({ json: { ...item.json, avatar_id: avatarId } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5504,
+        6976
+      ],
+      "id": "b7efd272-8c68-47a3-9bdb-9e176e87f010",
+      "name": "Pick Avatar1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fallback if no suitable male voice is found\nconst fallbackMaleVoiceId = '06f9223be7d444d887045ba89c1d00b6';\n\nconst root = $input.first().json;\n\n// Ensure `voices` is ALWAYS an array (data.voices -> voices -> [])\nconst voices = Array.isArray(root?.data?.voices)\n  ? root.data.voices\n  : (Array.isArray(root?.voices) ? root.voices : []);\n\n// Prefer explicit male gender; otherwise look for male-ish keywords\nconst preferred =\n  voices.find(v => String(v.gender || '').toLowerCase() === 'male') ||\n  voices.find(v => /(^|\\b)(male|baritone|deep)(\\b|$)/i.test(`${v.name || ''} ${v.style || ''}`)) ||\n  null;\n\n// Use either `voice_id` or `id`, else fallback\nconst voiceId = preferred?.voice_id ?? preferred?.id ?? fallbackMaleVoiceId;\n\n// Return same items with chosen voice_id attached\nreturn $input.all().map(i => ({ json: { ...i.json, voice_id: voiceId } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5488,
+        7904
+      ],
+      "id": "686eb897-fc14-44cf-ab4a-61115cef76ba",
+      "name": "Pick Male Voice1"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -6928,
+        7504
+      ],
+      "id": "2b09d230-8072-4a86-ae51-32c7b3d7f271",
+      "name": "RSS Read2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Grab all incoming items from the RSS node\nconst input = $input.all();\n\n// Keep first N headlines\nconst maxItems = 5;\nconst selected = input.slice(0, maxItems);\n\n// Build a simple bullet digest\nconst lines = selected.map(it => `• ${it.json.title}`);\nconst digest = lines.join('\\n');\n\n// Output ONE item with the digest text\nreturn [{ json: { digest } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6736,
+        7504
+      ],
+      "id": "f378273d-8d7b-40e3-9fe8-f4b3eb3cc4ae",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cands = items[0].json.candidates || [];\nconst text = cands?.[0]?.content?.parts?.[0]?.text || \"\";\n// Safety: trim & hard cap in case a model drifts long\nconst script = text.trim().slice(0, 1400);\nif (!script) {\n  throw new Error(\"Empty script from Gemini\");\n}\nreturn [{ json: { script } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6368,
+        7504
+      ],
+      "id": "a293ffaf-1067-418e-b56f-a6772a61f653",
+      "name": "Code14"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51458983-91c4-4eac-bd78-fff595a330e0",
+              "name": "avatar_id",
+              "value": "9bb55566ca0242609aa1fea1f7144656",
+              "type": "string"
+            },
+            {
+              "id": "e40cc964-ebb8-4982-9e91-d02d39c7291f",
+              "name": "voice_id",
+              "value": "0912d8004fd948a9aab02fffd264a3c1",
+              "type": "string"
+            },
+            {
+              "id": "cb388f5b-7f3e-47a2-8997-2e2168a8a318",
+              "name": "width",
+              "value": 1280,
+              "type": "number"
+            },
+            {
+              "id": "d7177985-2d6d-4f2a-b2da-b4194ec0cf41",
+              "name": "height",
+              "value": 720,
+              "type": "number"
+            },
+            {
+              "id": "e51ce9bd-7f77-4246-901d-32c7264dd6f0",
+              "name": "script",
+              "value": "Today, let’s talk about why Lionel Messi is often considered the greatest football player of all time.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5968,
+        7504
+      ],
+      "id": "53fccb12-4eb9-471e-b51a-d6f94e7281a5",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.heygen.com/v2/avatars",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "MDU2NTExODlmZWJmNGY2MTk4ZjBhMjEzMjM1NGYyNGItMTc1OTY0NjA2Ng=="
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5680,
+        7136
+      ],
+      "id": "7dcbcb01-6343-4e9d-9ad6-fadc8681329e",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.heygen.com/v2/video/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "MDU2NTExODlmZWJmNGY2MTk4ZjBhMjEzMjM1NGYyNGItMTc1OTY0NjA2Ng=="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_inputs\": [\n    {\n      \"character\": {\n        \"type\": \"avatar\",\n        \"avatar_id\": \"{{ $json.data.avatars[2].avatar_id }}\",\n        \"avatar_style\": \"normal\"\n      },\n      \"voice\": {\n        \"type\": \"text\",\n        \"input_text\": \"{{ $('Edit Fields1').item.json.script }}\",\n        \"voice_id\": \"73c0b6a2e29d4d38aca41454bf58c955\",\n        \"speed\": 1.1\n      }\n    }\n  ],\n  \"dimension\": {\n    \"width\": 1280,\n    \"height\": 720\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5120,
+        7456
+      ],
+      "id": "3ae488ba-b0c4-41e8-ad55-de149a44b196",
+      "name": "HTTP Request17"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the video_id from HeyGen's response\nconst vid = items[0].json?.data?.video_id;\n\nif (!vid) {\n  throw new Error(\"HeyGen did not return video_id\");\n}\n\nreturn [{\n  json: {\n    video_id: vid,\n    attempts: 0,  // start counter at 0\n    // pull configs that were set earlier in Set node (HeyGen Config)\n    max_poll_seconds: $json.max_poll_seconds,\n    poll_interval_seconds: $json.poll_interval_seconds\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4928,
+        7456
+      ],
+      "id": "2a1e3034-1ee2-44c9-b51b-34733cb4f95c",
+      "name": "Code15"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get current attempt count\nconst prev = $json.attempts || 0;\n\n// Base interval from config (default 6s if missing)\nconst base = $json.poll_interval_seconds || 6;\n\n// Backoff strategy: add +2s for every attempt, max 30s per wait\nconst wait = Math.min(base + prev * 2, 30);\n\n// Estimate total elapsed time (approx)\nconst elapsed = prev * wait;\n\n// Guardrail: stop if we exceed poll budget\nif (elapsed >= ($json.max_poll_seconds || 180)) {\n  throw new Error(\"Polling budget exceeded — video took too long.\");\n}\n\n// Return updated state for the next Wait node\nreturn [{\n  json: {\n    ...$json,\n    attempts: prev + 1,\n    next_wait: wait\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4160,
+        7680
+      ],
+      "id": "0563ceb6-5eb1-40f6-a259-a4189663c750",
+      "name": "Code16"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3936,
+        7680
+      ],
+      "id": "371d9c7b-a03f-4100-8378-67ba5da6f435",
+      "name": "Wait2",
+      "webhookId": "5687acac-1524-48c5-bb7c-a07a21f84b36"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0e8b672c-054a-4e3c-8fd4-649a70e5c50f",
+              "leftValue": "={{ $json.data.video_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3888,
+        7392
+      ],
+      "id": "ec517532-d74d-46f9-b391-826e60eda402",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.data.video_url}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3632,
+        7232
+      ],
+      "id": "984fabf2-2f78-4097-81d6-39d614eacdc7",
+      "name": "HTTP Request19"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3ad0cab-05f5-4598-b77e-cd4028b5db7d",
+              "name": "video_url",
+              "value": "={{$json.data.video_url}}",
+              "type": "string"
+            },
+            {
+              "id": "503d341a-11ba-4257-9969-c3aff9ad6b09",
+              "name": "thumbnail_url",
+              "value": "={{$json.data.thumbnail_url}}",
+              "type": "string"
+            },
+            {
+              "id": "f8389f43-53bb-4638-ba15-222979dbd057",
+              "name": "gif_url",
+              "value": "={{$json.data.gif_url}}",
+              "type": "string"
+            },
+            {
+              "id": "7277f43d-6c8f-49eb-b12e-2dbe21378790",
+              "name": "job_id",
+              "value": "={{$json.data.id}}",
+              "type": "string"
+            },
+            {
+              "id": "977acbfb-50d2-49ea-bd75-40d06c9b75a7",
+              "name": "status",
+              "value": "={{$json.data.status}}",
+              "type": "string"
+            },
+            {
+              "id": "27636f05-33b2-4bcb-8982-7a7f1c31a775",
+              "name": "created_at",
+              "value": "={{$json.data.created_at}}",
+              "type": "string"
+            },
+            {
+              "id": "1a2215b4-e96d-491c-924d-707524d43237",
+              "name": "duration",
+              "value": "={{$json.data.duration}}",
+              "type": "string"
+            },
+            {
+              "id": "a417f8e0-aeda-419e-99ee-2f77dca3fc14",
+              "name": "message",
+              "value": "Video successfully generated",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3376,
+        7328
+      ],
+      "id": "6f4c0877-0cba-4cb8-bad8-3744935f1f2b",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  if (!item.json.video_url) {\n    throw new Error(\"Video generation failed — no video_url returned.\");\n  }\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3568,
+        7632
+      ],
+      "id": "808339e8-2968-4518-865d-68ea84e73487",
+      "name": "Code17"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.data.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ccd79eeb-84f1-4569-97ea-6992124951e0"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a40393e6-90a0-4c02-8960-955351a6ec1b",
+                    "leftValue": "={{ $json.data.status }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "34e64d51-bbd3-461d-afbf-75cdf0778fc1",
+                    "leftValue": "={{$json.data.status}}",
+                    "rightValue": "waiting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e4a74658-27ce-432a-9f53-e3fe9459020e",
+                    "leftValue": "={{$json.data.status}}",
+                    "rightValue": "pending",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ff190bff-4f11-4d2f-8835-a5f656f50e8a",
+                    "leftValue": "={{$json.data.status}}",
+                    "rightValue": "processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4384,
+        7312
+      ],
+      "id": "4fe89bbc-870a-459c-a812-0884e0ab8886",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAqNnJtQE888wIZHoTCYwP1pn0sZ3X2y_Q",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [\n    {\n      parts: [\n        { text: $json.digest }\n      ]\n    }\n  ]\n}) }}\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6544,
+        7504
+      ],
+      "id": "639b027e-43be-4fb6-a185-638eb951d075",
+      "name": "HTTP Request20"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -7120,
+        7504
+      ],
+      "id": "1b233df0-4dd7-4b46-a08d-bdb14e8513b1",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://api.heygen.com/v2/voices",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "MDU2NTExODlmZWJmNGY2MTk4ZjBhMjEzMjM1NGYyNGItMTc1OTY0NjA2Ng=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "voice_id",
+              "value": "={{ $json.voice_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5664,
+        7744
+      ],
+      "id": "6d5f1dac-20ab-4f24-9796-ab51be24c6ae",
+      "name": "HTTP Request16"
+    },
+    {
+      "parameters": {
+        "url": "https://api.heygen.com/v1/video_status.get",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "video_id",
+              "value": "={{ $json.video_id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "MDU2NTExODlmZWJmNGY2MTk4ZjBhMjEzMjM1NGYyNGItMTc1OTY0NjA2Ng=="
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {}
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4656,
+        7440
+      ],
+      "id": "69edd9b3-6506-4778-95d6-5ca2dfe2fd37",
+      "name": "HTTP Request18"
+    },
+    {
+      "parameters": {
+        "content": "## I'm a note \nMDU2NTExODlmZWJmNGY2MTk4ZjBhMjEzMjM1NGYyNGItMTc1OTY0NjA2Ng=="
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -7136,
+        7088
+      ],
+      "typeVersion": 1,
+      "id": "70ce4181-934f-4da2-bff8-9dbea7f5e602",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Use My Script1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Avatar1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request17",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Male Voice1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request17",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read2": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request20",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code14": {
+      "main": [
+        [
+          {
+            "node": "Use My Script1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request16",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request17",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pick Avatar1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request17": {
+      "main": [
+        [
+          {
+            "node": "Code15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code15": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request18",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code16": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request18",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request19",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request19": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code17",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code16",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request20": {
+      "main": [
+        [
+          {
+            "node": "Code14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "RSS Read2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request16": {
+      "main": [
+        [
+          {
+            "node": "Pick Male Voice1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request17",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request18": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "25e7d007-1b97-42df-9aa1-494141c2f57f",
+  "meta": {
+    "instanceId": "e5d1dfafbaa8067bb2858069be2db1658af80f076d0e02664f00e23ff96e62ae"
+  },
+  "id": "jk8rZ4D6Ti3uzqqI",
+  "tags": []
+}
