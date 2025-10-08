@@ -12,9 +12,8 @@ Simply click execute and watch as your workflow automatically creates a news vid
 ----
 
 🎥 **Project Demo:** 
-<video src="https://github.com/Awaisali36/ai-avatar-video-generation-system/blob/main/Vidoes%20/sound_effect_preview.mp4" controls width="600">
-  Your browser does not support the video tag.
-</video>
+[![Preview Video](https://img.shields.io/badge/🎬%20Watch%20Preview-blue)](https://github.com/Awaisali36/ai-avatar-video-generation-system/blob/main/Vidoes%20/preview_video_target.mp4)
+
 
 ---
 
