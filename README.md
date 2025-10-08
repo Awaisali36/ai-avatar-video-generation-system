@@ -8,7 +8,13 @@
 > **Fully automated AI video generator that transforms RSS news feeds into professional avatar-presented videos. Fetches headlines, generates scripts with Gemini AI, and creates videos with HeyGen's realistic AI avatars.**
 
 Simply click execute and watch as your workflow automatically creates a news video from the latest BBC headlines—complete with an AI avatar presenter and professionally generated script.
-🎥 **Project Demo:** [Watch Preview Video](https://github.com/Awaisali36/ai-avatar-video-generation-system/blob/main/Vidoes%20/preview_video_target.mp4)
+
+----
+
+🎥 **Project Demo:** 
+<video src="https://github.com/Awaisali36/ai-avatar-video-generation-system/blob/main/Vidoes%20/preview_video_target.mp4" controls width="600">
+  Your browser does not support the video tag.
+</video>
 
 ---
 
